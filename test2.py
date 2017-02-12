@@ -1,6 +1,8 @@
 import pygame
 import sys
 from time import sleep
+speed = 10
+direction = "Left"
 
 def load_image(name):
     image = pygame.image.load(name)
@@ -30,16 +32,19 @@ class TestSprite(pygame.sprite.Sprite):
         consider using a timer of some sort so it updates slower.'''
         self.index += 1
 
-        speed = 10
+        global speed
+        global direction
 
-        if self.rect.x >= 480:
+        if self.rect.x == 485 and direction == "Left":
             # The line below flips the goat
             self.image = pygame.transform.flip(self.image,True,False)
             speed = -10
-        else:
+            direction = "Right"
+        elif self.rect.x == -5 and direction == "Right":
             # The line below flips the goat
             self.image = pygame.transform.flip(self.image,True,False)            
             speed=10
+            direction = "Left"
         print(self.rect.x)
         self.rect.x += speed
         if self.index >= len(self.images):

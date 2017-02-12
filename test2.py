@@ -29,13 +29,11 @@ class TestSprite(pygame.sprite.Sprite):
         self.image = self.images[self.index]
         self.rect = pygame.Rect(self.x, self.y, 116, 128)
         
-        #pygame.transform.flip(self, True, False)
 
     def update(self):
         '''This method iterates through the elements inside self.images and 
         displays the next one each tick. For a slower animation, you may want to 
         consider using a timer of some sort so it updates slower.'''
-        #print(self.index)
         global leftkeypressed
         global rightkeypressed
         if direction == "Right":
@@ -51,7 +49,7 @@ class TestSprite(pygame.sprite.Sprite):
         global speed
         global direction
 
-        if self.rect.x == 485 and direction == "Left":
+        if self.rect.x == 605 and direction == "Left":
             speed = -10
             direction = "Right"
             self.index = 0
@@ -59,7 +57,6 @@ class TestSprite(pygame.sprite.Sprite):
             speed=10
             direction = "Left"
             self.index = 5
-        #print(self.rect.x)
         self.rect.x += speed
         if self.index >= len(self.images):
             self.index = 0
@@ -70,7 +67,7 @@ class TestSprite(pygame.sprite.Sprite):
         
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((640, 480))
+    screen = pygame.display.set_mode((800, 600))
     leftkeypressed = False
     rightkeypressed = False
     global speed
@@ -88,13 +85,11 @@ def main():
                 if event.key == pygame.K_LEFT:
                     direction = "Right"
                     speed = -10
-                    print(speed)
                     leftkeypressed = True
                     leftkeypressed = False
                 elif event.key == pygame.K_RIGHT:
                     direction = "Left"
                     speed = 10
-                    print(speed)
                     rightkeypressed = True
                     rightkeypressed = False
 

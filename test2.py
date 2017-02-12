@@ -17,10 +17,15 @@ class TestSprite(pygame.sprite.Sprite):
         self.images.append(load_image('goatblack3.gif'))
         self.images.append(load_image('goatblack4.gif'))
         self.images.append(load_image('goatblack5.gif'))
+        self.images.append(load_image('goatblack1flipped.gif'))
+        self.images.append(load_image('goatblack2flipped.gif'))
+        self.images.append(load_image('goatblack3flipped.gif'))
+        self.images.append(load_image('goatblack4flipped.gif'))
+        self.images.append(load_image('goatblack5flipped.gif'))
         self.x=5
         self.y=5
         
-        self.index = 0
+        self.index = 5
         self.image = self.images[self.index]
         self.rect = pygame.Rect(self.x, self.y, 116, 128)
         
@@ -30,22 +35,30 @@ class TestSprite(pygame.sprite.Sprite):
         '''This method iterates through the elements inside self.images and 
         displays the next one each tick. For a slower animation, you may want to 
         consider using a timer of some sort so it updates slower.'''
-        self.index += 1
+        print(self.index)
+        if direction == "Right":
+            if self.index >= 4:
+                self.index = 0
+            else:
+                self.index+=1
+        elif direction == "Left":
+            if self.index >= 9:
+                self.index = 5
+            else:
+                self.index +=1
 
         global speed
         global direction
 
         if self.rect.x == 485 and direction == "Left":
-            # The line below flips the goat
-            self.image = pygame.transform.flip(self.image,True,False)
             speed = -10
             direction = "Right"
-        elif self.rect.x == -5 and direction == "Right":
-            # The line below flips the goat
-            self.image = pygame.transform.flip(self.image,True,False)            
+            self.index = 0
+        elif self.rect.x == -5 and direction == "Right":          
             speed=10
             direction = "Left"
-        print(self.rect.x)
+            self.index = 5
+        #print(self.rect.x)
         self.rect.x += speed
         if self.index >= len(self.images):
             self.index = 0

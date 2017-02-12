@@ -35,7 +35,9 @@ class TestSprite(pygame.sprite.Sprite):
         '''This method iterates through the elements inside self.images and 
         displays the next one each tick. For a slower animation, you may want to 
         consider using a timer of some sort so it updates slower.'''
-        print(self.index)
+        #print(self.index)
+        global leftkeypressed
+        global rightkeypressed
         if direction == "Right":
             if self.index >= 4:
                 self.index = 0
@@ -46,7 +48,6 @@ class TestSprite(pygame.sprite.Sprite):
                 self.index = 5
             else:
                 self.index +=1
-
         global speed
         global direction
 
@@ -70,15 +71,32 @@ class TestSprite(pygame.sprite.Sprite):
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
-
+    leftkeypressed = False
+    rightkeypressed = False
+    global speed
+    global leftkeypressed
+    global rightkeypressed
+    global direction
     my_sprite = TestSprite()
     my_group = pygame.sprite.Group(my_sprite)
-
     while True:
         event = pygame.event.poll()
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit(0)
+        if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    direction = "Right"
+                    speed = -10
+                    print(speed)
+                    leftkeypressed = True
+                    leftkeypressed = False
+                elif event.key == pygame.K_RIGHT:
+                    direction = "Left"
+                    speed = 10
+                    print(speed)
+                    rightkeypressed = True
+                    rightkeypressed = False
 
         # Calling the 'my_group.update' function calls the 'update' function of all 
         # its member sprites. Calling the 'my_group.draw' function uses the 'image'

@@ -12,18 +12,19 @@ class TestSprite(pygame.sprite.Sprite):
     def __init__(self):
         super(TestSprite, self).__init__()
         self.images = []
-        self.images.append(load_image('goatblack1.gif'))
-        self.images.append(load_image('goatblack2.gif'))
-        self.images.append(load_image('goatblack3.gif'))
-        self.images.append(load_image('goatblack4.gif'))
-        self.images.append(load_image('goatblack5.gif'))
-        self.images.append(load_image('goatblack1flipped.gif'))
-        self.images.append(load_image('goatblack2flipped.gif'))
-        self.images.append(load_image('goatblack3flipped.gif'))
-        self.images.append(load_image('goatblack4flipped.gif'))
-        self.images.append(load_image('goatblack5flipped.gif'))
+        self.images.append(load_image('goat1.gif').convert_alpha())
+        self.images.append(load_image('goat2.gif').convert_alpha())
+        self.images.append(load_image('goat3.gif').convert_alpha())
+        self.images.append(load_image('goat4.gif').convert_alpha())
+        self.images.append(load_image('goat5.gif').convert_alpha())
+        self.images.append(load_image('goat1flipped.png').convert_alpha())
+        self.images.append(load_image('goat2flipped.png').convert_alpha())
+        self.images.append(load_image('goat3flipped.png').convert_alpha())
+        self.images.append(load_image('goat4flipped.png').convert_alpha())
+        self.images.append(load_image('goat5flipped.png').convert_alpha())
         self.x=5
         self.y=5
+        
         
         self.index = 5
         self.image = self.images[self.index]
@@ -34,8 +35,6 @@ class TestSprite(pygame.sprite.Sprite):
         '''This method iterates through the elements inside self.images and 
         displays the next one each tick. For a slower animation, you may want to 
         consider using a timer of some sort so it updates slower.'''
-        global leftkeypressed
-        global rightkeypressed
         if direction == "Right":
             if self.index >= 4:
                 self.index = 0
@@ -61,19 +60,24 @@ class TestSprite(pygame.sprite.Sprite):
         if self.index >= len(self.images):
             self.index = 0
         self.image = self.images[self.index]
+        screen.blit(background, (self.rect.x, self.rect.y))
         # Each frame of animation is displayed for 0.07 seconds
         sleep(0.07)
         
         
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
-    leftkeypressed = False
-    rightkeypressed = False
     global speed
     global leftkeypressed
     global rightkeypressed
     global direction
+    global screen
+    global background
+    screen = pygame.display.set_mode((800, 600))
+    background = pygame.image.load('background.bmp').convert()
+    screen.blit(background, (0,0))
+    leftkeypressed = False
+    rightkeypressed = False
     my_sprite = TestSprite()
     my_group = pygame.sprite.Group(my_sprite)
     while True:

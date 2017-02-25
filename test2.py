@@ -3,7 +3,6 @@ import sys
 from time import sleep
 speed = 10
 direction = "Left"
-
 def load_image(name):
     image = pygame.image.load(name)
     return image
@@ -35,6 +34,7 @@ class TestSprite(pygame.sprite.Sprite):
         '''This method iterates through the elements inside self.images and 
         displays the next one each tick. For a slower animation, you may want to 
         consider using a timer of some sort so it updates slower.'''
+        print(self.rect.y)
         if direction == "Right":
             if self.index >= 4:
                 self.index = 0
@@ -45,8 +45,9 @@ class TestSprite(pygame.sprite.Sprite):
                 self.index = 5
             else:
                 self.index +=1
-        global speed
         global direction
+        global speed
+        global level
 
         if self.rect.x == 605 and direction == "Left":
             speed = -10
@@ -56,26 +57,38 @@ class TestSprite(pygame.sprite.Sprite):
             speed=10
             direction = "Left"
             self.index = 5
+
+        if self.rect.x >= 550 and level == 1:
+            screen.blit(background, (self.rect.x, self.rect.y))
+            self.rect.y = self.rect.y + 230
+            level = 2
+        
         self.rect.x += speed
         if self.index >= len(self.images):
             self.index = 0
         self.image = self.images[self.index]
         screen.blit(background, (self.rect.x, self.rect.y))
+        screen.blit(ground, (0, 120))
+        screen.blit(ground, (300, 350))
         # Each frame of animation is displayed for 0.07 seconds
         sleep(0.07)
         
         
 def main():
     pygame.init()
-    global speed
     global leftkeypressed
     global rightkeypressed
-    global direction
     global screen
     global background
+    global ground
+    global level
+    global direction
+    global speed
+    level = 1
     screen = pygame.display.set_mode((800, 600))
     background = pygame.image.load('background.bmp').convert()
     screen.blit(background, (0,0))
+    ground = pygame.image.load('ground.png').convert()
     leftkeypressed = False
     rightkeypressed = False
     my_sprite = TestSprite()

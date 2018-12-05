@@ -20,21 +20,30 @@ def splitinput(line):  # Splits the input into separate variables
     return id, xcoord, ycoord, width, height
 
 
-def overlapping(claims):
+def idofoverlapping(claims):
     grid = np.zeros((1000, 1000))  # Creates a 1000x1000 'grid' of 0s
     for claim in claims:  # Loops through all of the claims from elves
         id = claim[0]  # Extracts the id
         xcoord = claim[1]  # Extracts the x coordinate of the rectangle
         ycoord = claim[2]  # Extracts the y coordinate of the rectangle
         width = claim[3]  # Extracts the width of the rectangle
-        height = claim[4]  # Extracts the height of the rectangle
+        height = claim[4]  # Extracts the width of the rectangle
 
-        grid[xcoord:xcoord + width, ycoord:ycoord + height] += 1
-    return np.size(np.where(grid >= 2)[0])
+        grid[xcoord:xcoord + width, ycoord:ycoord + height] += 1  # Plots the claim on the grid
+
+    for claim in claims:  # Loop back through the claims after they have been plotted
+        id = claim[0]  # Extracts the id
+        xcoord = claim[1]  # Extracts the x coordinate of the rectangle
+        ycoord = claim[2]  # Extracts the y coordinate of the rectangle
+        width = claim[3]  # Extracts the width of the rectangle
+        height = claim[4]  # Extracts the width of the rectangle
+
+        if np.all(grid[xcoord:xcoord + width, ycoord:ycoord + height] == 1):  # If the area of rectangle of the current claim has only been claimed once
+            return id
 
 
 for entry in puzzle_input:
     rect_data = splitinput(entry)
     claims.append(rect_data)
 
-print(overlapping(claims))
+print(idofoverlapping(claims))

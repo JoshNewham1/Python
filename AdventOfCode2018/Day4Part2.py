@@ -5,8 +5,7 @@ textfile = open(filename, "r")
 puzzle_input = textfile.readlines()
 puzzle_input.sort()  # Sort before beginning
 
-minutesAsleep = defaultdict(lambda: defaultdict(int))
-totalAsleep = defaultdict(int)
+minutesAsleep = defaultdict(int)
 
 
 def parsetime(line):
@@ -33,13 +32,11 @@ for line in puzzle_input:
         asleep = time
     elif 'wakes up' in line:
         for minute in range(asleep, time):
-            minutesAsleep[guardNumber][minute] += 1
-            totalAsleep[guardNumber] += 1
+            minutesAsleep[(guardNumber, minute)] += 1
 
 
-bestGuard = maxvalue(totalAsleep)
-bestMinute = maxvalue(minutesAsleep[bestGuard])
+bestGuard, bestMinute = maxvalue(minutesAsleep)  # Gets the most frequent minute and finds the guard associated with it
 
-print("Guard with most time slept: " + str(bestGuard))
-print("Their most frequent minute to sleep was " + str(bestMinute))
-print("Guard ID x Minute = " + str(bestGuard * bestMinute))
+print("Most frequent minute: " + str(bestMinute))
+print("Guard associated with this minute: " + str(bestGuard))
+print("Minute x Guard: " + str(bestMinute * bestGuard))

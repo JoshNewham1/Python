@@ -22,4 +22,4 @@ width = 3  # Looking for a 3x3 box
 powerInGrid = sum(grid[x:x - width + 1 or None, y:y - width + 1 or None] for x in range(width) for y in range(width))
 maximum = int(powerInGrid.max())  # Get the maximum power level
 location = np.where(powerInGrid == maximum)  # Find the coordinates of the maximum power level
-print(width, maximum, location[0][0] + 1, location[1][0] + 1)  # Print specified width, max power and coords
+print(width, maximum, location[0][0] + 1, location[1][0] + 1)  # Print width, max power and coords

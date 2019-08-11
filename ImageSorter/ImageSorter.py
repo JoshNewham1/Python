@@ -12,11 +12,11 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from wand.image import Image as wand_img
 import filetype  # To decide whether a file is valid or not
-import sys  # To support arguments
 import filecmp  # To identify duplicate files (byte-by-byte analysis)
 import subprocess  # To execute commands (for ffprobe)
 import json  # To deserialise JSON
 import shlex  # To split up the arguments for ffmpeg
+import shutil # To support copying of files and their metadata
 
 # Images Dictionary Layout:
 # key = full path of image
@@ -154,7 +154,7 @@ def create_folder(images, output_path, key):
         pass
 
 
-def move_and_rename(images, file_name, parent_dir, output_path, key, file_extension):
+def action_file(images, output_path, key, file_extension, copy_files):
     source = key
     destination = get_new_path(images, None, key, output_path, file_extension)
     num = 1  # Counter for number after image
@@ -168,7 +168,10 @@ def move_and_rename(images, file_name, parent_dir, output_path, key, file_extens
             os.remove(source)  # Remove the duplicate file
             break
     if not same_file:  # Only move files that aren't duplicate
-        os.rename(source, destination)
+        if copy_files:
+            shutil.copy2(source, destination)
+        else:
+            os.rename(source, destination)
 
 # Construct the argument parser and parse the arguments provided
 ap = argparse.ArgumentParser()
@@ -176,6 +179,8 @@ ap.add_argument("-i", "--input", required=True,
                 help="path to the input folder of images/videos")
 ap.add_argument("-o", "--output", required=True,
                 help="path to the organised, output folder")
+ap.add_argument("-c", "--copy", required=False, action="store_true",
+                help="specify if the photos should be copied and not moved")
 ap.add_argument("-l", "--del-live-photos", required=False, action="store_true",
                 help="specify whether to delete apple live photos")
 args = vars(ap.parse_args())
@@ -183,6 +188,7 @@ print(args)
 
 input_path = args["input"]
 output_path = args["output"]
+copy_files = args["copy"]
 del_live_photos = args["del_live_photos"]
 
 images = {}
@@ -237,6 +243,6 @@ for files in os.walk(input_path):
             if valid:  # If the image is valid after conversion/checks
                 #  Call functions here
                 create_folder(images, output_path, current_path)
-                move_and_rename(images, file, parent_dir, output_path, current_path, file_extension)
+                action_file(images, output_path, current_path, file_extension, copy_files)
 
 print(images)

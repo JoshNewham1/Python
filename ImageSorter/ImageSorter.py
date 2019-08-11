@@ -7,6 +7,7 @@ import os
 import platform
 import time
 import datetime
+import argparse
 from PIL import Image
 from PIL.ExifTags import TAGS
 from wand.image import Image as wand_img
@@ -15,7 +16,7 @@ import sys  # To support arguments
 import filecmp  # To identify duplicate files (byte-by-byte analysis)
 import subprocess  # To execute commands (for ffprobe)
 import json  # To deserialise JSON
-import shlex  # To split up the arguments
+import shlex  # To split up the arguments for ffmpeg
 
 # Images Dictionary Layout:
 # key = full path of image
@@ -169,21 +170,20 @@ def move_and_rename(images, file_name, parent_dir, output_path, key, file_extens
     if not same_file:  # Only move files that aren't duplicate
         os.rename(source, destination)
 
+# Construct the argument parser and parse the arguments provided
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--input", required=True,
+                help="path to the input folder of images/videos")
+ap.add_argument("-o", "--output", required=True,
+                help="path to the organised, output folder")
+ap.add_argument("-l", "--del-live-photos", required=False, action="store_true",
+                help="specify whether to delete apple live photos")
+args = vars(ap.parse_args())
+print(args)
 
-if len(sys.argv) == 3:
-    input_path = sys.argv[1]
-    output_path = sys.argv[2]
-else:
-    input_path = os.path.join(os.getcwd(), "input")
-    output_path = os.path.join(os.getcwd(), "output")
-
-del_live_photos = input("Delete Apple Live Photos? (y or n) ")
-if del_live_photos.lower() == "y":
-    del_live_photos = True
-elif del_live_photos.lower() == "n":
-    del_live_photos = False
-else:
-    del_live_photos = False
+input_path = args["input"]
+output_path = args["output"]
+del_live_photos = args["del_live_photos"]
 
 images = {}
 valid = True

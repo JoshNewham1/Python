@@ -165,13 +165,29 @@ def action_file(images, output_path, key, file_extension, copy_files):
             num = num + 1
             destination = get_new_path(images, str(num), key, output_path, file_extension)
         else:  # If there are duplicate files
-            os.remove(source)  # Remove the duplicate file
-            break
+            if copy_files:
+                break
+            else:
+                os.remove(source)  # Remove the duplicate file
+                break
     if not same_file:  # Only move files that aren't duplicate
         if copy_files:
             shutil.copy2(source, destination)
         else:
             os.rename(source, destination)
+
+
+def reject_file(key, file, output_path, copy_files):
+    invalid_dir = os.path.join(output_path, "invalid")
+    try:
+        os.makedirs(invalid_dir)
+    except FileExistsError:
+        pass
+    if copy_files:
+        shutil.copy2(key, invalid_dir)
+    else:
+        os.rename(key, os.path.join(invalid_dir, file))
+
 
 # Construct the argument parser and parse the arguments provided
 ap = argparse.ArgumentParser()
@@ -183,6 +199,8 @@ ap.add_argument("-c", "--copy", required=False, action="store_true",
                 help="specify if the photos should be copied and not moved")
 ap.add_argument("-l", "--del-live-photos", required=False, action="store_true",
                 help="specify whether to delete apple live photos")
+ap.add_argument("-r", "--reject-modification-date", required=False, action="store_true",
+                help="use if modification/creation date of files is incorrect")
 args = vars(ap.parse_args())
 print(args)
 
@@ -190,6 +208,7 @@ input_path = args["input"]
 output_path = args["output"]
 copy_files = args["copy"]
 del_live_photos = args["del_live_photos"]
+reject_mdate = args["reject_modification_date"]
 
 images = {}
 valid = True
@@ -218,31 +237,37 @@ for files in os.walk(input_path):
                     image = Image.open(current_path)
                     exif_data = image._getexif()
                     image.close()
-                except OSError:
+                except OSError: # If the file has no EXIF data
                     valid = False
                     exif_data = ""
                 if get_field(exif_data, 'DateTime') != 0:  # If the image has sufficient EXIF data, use that
                     date = get_field((exif_data), 'DateTime')
                     # Use the entire path as a key (so duplicate names in different paths aren't overwritten)
                     images[current_path] = format_exif(date)
-                else:  # If not, use the creation time
+                elif not reject_mdate:  # If not, use the creation time
                     date = time.ctime(retrieve_creation_date(current_path))
                     date = datetime.datetime.strptime(date, "%a %b %d %H:%M:%S %Y")
                     images[current_path] = format_created_date(date)
+                else:  # If the creation/modification time should be rejected
+                    reject_file(current_path, file, output_path, copy_files)
+                    valid = False
+
             elif (file_extension.lower() == ".mov" or file_extension.lower() == ".mp4") and \
                     get_time_taken_video(current_path) is not None:
                 time_taken = get_time_taken_video(current_path)
                 images[current_path] = format_created_date(time_taken)
                 valid = True
             elif valid_file(current_path):  # If the file is not an image, but is still accepted e.g. a video file
-                valid = True
-                date = time.ctime(retrieve_creation_date(current_path))
-                date = datetime.datetime.strptime(date, "%a %b %d %H:%M:%S %Y")
-                images[current_path] = format_created_date(date)
+                if not reject_mdate:
+                    valid = True
+                    date = time.ctime(retrieve_creation_date(current_path))
+                    date = datetime.datetime.strptime(date, "%a %b %d %H:%M:%S %Y")
+                    images[current_path] = format_created_date(date)
+                else:  # If the creation/modification time should be rejected for other valid files
+                    reject_file(current_path, file, output_path, copy_files)
+                    valid = False
 
             if valid:  # If the image is valid after conversion/checks
                 #  Call functions here
                 create_folder(images, output_path, current_path)
                 action_file(images, output_path, current_path, file_extension, copy_files)
-
-print(images)

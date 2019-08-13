@@ -16,7 +16,8 @@ import filecmp  # To identify duplicate files (byte-by-byte analysis)
 import subprocess  # To execute commands (for ffprobe)
 import json  # To deserialise JSON
 import shlex  # To split up the arguments for ffmpeg
-import shutil # To support copying of files and their metadata
+import shutil  # To support copying of files and their metadata
+from pathlib import Path  # To recreate the directory structure of the input file when handling rejects
 
 # Images Dictionary Layout:
 # key = full path of image
@@ -170,22 +171,24 @@ def action_file(images, output_path, key, file_extension, copy_files):
             else:
                 os.remove(source)  # Remove the duplicate file
                 break
-    if not same_file:  # Only move files that aren't duplicate
+    if not same_file:  # Only move/copy files that aren't duplicate
         if copy_files:
             shutil.copy2(source, destination)
         else:
             os.rename(source, destination)
 
 
-def reject_file(key, file, output_path, copy_files):
-    invalid_dir = os.path.join(output_path, "invalid")
+def reject_file(key, file, input_path, output_path, copy_files):
+    source_path = Path(key).parent  # Converts string path to pathlib item and gets the parent directory of file
+    dir_structure = source_path.relative_to(input_path)  # Gets structure of folders after generic input path
+    invalid_dir = os.path.join(output_path, "invalid", dir_structure)
     try:
         os.makedirs(invalid_dir)
     except FileExistsError:
         pass
-    if copy_files:
-        shutil.copy2(key, invalid_dir)
-    else:
+    if copy_files:  # If user wants files copied, not moved
+        shutil.copy2(key, invalid_dir)  # shutil.copy2 used to copy with metadata
+    else:  # Move the file
         os.rename(key, os.path.join(invalid_dir, file))
 
 
@@ -249,7 +252,7 @@ for files in os.walk(input_path):
                     date = datetime.datetime.strptime(date, "%a %b %d %H:%M:%S %Y")
                     images[current_path] = format_created_date(date)
                 else:  # If the creation/modification time should be rejected
-                    reject_file(current_path, file, output_path, copy_files)
+                    reject_file(current_path, file, input_path, output_path, copy_files)
                     valid = False
 
             elif (file_extension.lower() == ".mov" or file_extension.lower() == ".mp4") and \
@@ -264,7 +267,7 @@ for files in os.walk(input_path):
                     date = datetime.datetime.strptime(date, "%a %b %d %H:%M:%S %Y")
                     images[current_path] = format_created_date(date)
                 else:  # If the creation/modification time should be rejected for other valid files
-                    reject_file(current_path, file, output_path, copy_files)
+                    reject_file(current_path, file, input_path, output_path, copy_files)
                     valid = False
 
             if valid:  # If the image is valid after conversion/checks
